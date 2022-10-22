@@ -3,7 +3,7 @@ import { Header } from './components'
 
 const App = () => {
   return (
-    <div className='w-screen h-auto flex-col p-4'>
+    <div>
       <Header/>
     </div>
   )
