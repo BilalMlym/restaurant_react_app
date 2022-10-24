@@ -13,6 +13,7 @@ const App = () => {
           <Route path="/*" element={<MainContainer />}></Route>
           <Route path="/createItem" element={<CreateContainer />}></Route>
         </Routes>
+        {console.log('here')}
       </main>
     </div>
     </AnimatePresence>

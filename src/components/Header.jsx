@@ -1,16 +1,42 @@
 import React from 'react';
 import Logo from './img/logo.png'
+
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { app } from '../firebase.config';
+
+
 import Avatar from './img/avatar.png'
-import { MdShoppingBasket } from "react-icons/md";
+import { MdShoppingBasket, MdAdd, MdLogout } from "react-icons/md";
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useStateValue } from '../context/stateProvider';
+import { actionType } from '../context/reducer';
 
 
 const Header = () => {
+  const desktop = "hidden md:flex";
+  const mobile = "flex md:hidden"; 
+  const firebaseAuth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  const [{user}, dispatch] = useStateValue();
+  
+
+  const login = async () => {
+    if (!user) {
+      const {user: {refreshToken, providerData}} = await signInWithPopup(firebaseAuth, provider);
+      dispatch({
+      type : actionType.SET_USER,
+      user : providerData[0]
+    })
+    localStorage.setItem("user" , JSON.stringify(providerData[0]));
+
+  }
+    }
   return (
 <header className="fixed z-50 w-screen p-3 px-4 md:p-6 md:px-16 bg-primary">
   {/* destop and tablet */}
-  <div className="hidden md:flex w-full h-full items-center justify-between">
+  <div className={`${desktop} w-full h-full items-center justify-between`}>
     <Link to={"/"} className='flex items-center gap-2'>
       <img src={Logo} className="w-8 object-cover" alt="logo"/>
       <p className="text-headingColor text-xl font-bold">ChickHot</p>
@@ -31,12 +57,19 @@ const Header = () => {
                   2
                 </p>
               </div>
-              <motion.img 
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.8 }}
-              style={{ x: 15 }}
-
-               src={Avatar} className="w-10 min-w-[40px] h-10 min-h-[40px] drop-shadow-xl ml-3 cursor-pointer" alt="userProfile" />
+              <div className="relative">
+                <motion.img 
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.8 }}
+                style={{ x: 15 }}
+                src={user ? user.photoURL : Avatar} className="w-10 min-w-[40px] h-10 min-h-[40px] drop-shadow-xl ml-3 cursor-pointer rounded-full" alt="userProfile"
+                onClick={login}
+                />
+                <div className="w-40 bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-12 right-0">
+                  <p className="flex  items-center gap-3 cursor-pointer hover:bg-slate-200 rounded-lg transition-all duration-100 ease-in-out text text-textColor text-base p-3">New Item  <MdAdd/></p>
+                  <p className=" flex  items-center gap-3 cursor-pointer hover:bg-slate-200 rounded-lg transition-all duration-100 ease-in-out text text-textColor text-base p-3">Logout  <MdLogout/></p>
+                </div>
+              </div>
             
           </div>  
   </div>
@@ -44,7 +77,7 @@ const Header = () => {
 
 
   {/* mobile */}
-  <div className='flex md:hidden w-screen h-full'>aslşdşasl</div>
+  <div className={`${mobile} w-screen h-full`}>aslşdşasl</div>
 </header>
   )
 };
