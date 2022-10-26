@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Logo from './img/logo.png'
 
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
@@ -20,6 +20,8 @@ const Header = () => {
   const provider = new GoogleAuthProvider();
 
   const [{user}, dispatch] = useStateValue();
+
+  const [IsMenu, setIsMenu] = useState(false);
   
 
   const login = async () => {
@@ -31,6 +33,8 @@ const Header = () => {
     })
     localStorage.setItem("user" , JSON.stringify(providerData[0]));
 
+  }else {
+    setIsMenu(!IsMenu);
   }
     }
   return (
@@ -65,10 +69,17 @@ const Header = () => {
                 src={user ? user.photoURL : Avatar} className="w-10 min-w-[40px] h-10 min-h-[40px] drop-shadow-xl ml-3 cursor-pointer rounded-full" alt="userProfile"
                 onClick={login}
                 />
-                <div className="w-40 bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-12 right-0">
-                  <p className="flex  items-center gap-3 cursor-pointer hover:bg-slate-200 rounded-lg transition-all duration-100 ease-in-out text text-textColor text-base p-3">New Item  <MdAdd/></p>
+                {
+                  IsMenu && (
+                    <div className="w-40 bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-12 right-0">
+                {user && user.email === "bilalmlym@gmail.com" && (
+                  <Link to={'/createItem'}>
+                    <p className="flex  items-center gap-3 cursor-pointer hover:bg-slate-200 rounded-lg transition-all duration-100 ease-in-out text text-textColor text-base p-3">New Item  <MdAdd/></p>
+                  </Link> )}
                   <p className=" flex  items-center gap-3 cursor-pointer hover:bg-slate-200 rounded-lg transition-all duration-100 ease-in-out text text-textColor text-base p-3">Logout  <MdLogout/></p>
                 </div>
+                  )
+                }
               </div>
             
           </div>  
