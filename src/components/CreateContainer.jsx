@@ -14,6 +14,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { storage } from "../firebase.config";
+import { saveItem } from "../utils/firebaseFunctions";
 
 
 const CreateContainer = () => {
@@ -31,11 +32,106 @@ const CreateContainer = () => {
   const uploadImage=(e)=>{
     setIsLoading(true);
     const imageFile = e.target.files[0];
-    const  storageRef = ref(storage, 'Images/${Date.now()}-${imageFile.name}');
+    const storageRef = ref(storage, `Images/${Date.now()}-${imageFile.name}`);
     const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
-  const deleteImage=()=>{}
-  const saveDetails=()=>{}
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const uploadProgress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    }, (error) => {
+      console.log(error)
+      setFields(true)
+      setMsg('Error while uploading : Try Again Later')
+      setAlertStatus('danger')
+      setTimeout(() => {
+        setFields(false)
+        setIsLoading(false)
+      }, 4000);
+    }, () => {
+      getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
+        setImageAsset(downloadURL)
+        setIsLoading(false)
+        setFields(true)
+        setMsg('Image Uploaded')
+        setAlertStatus('success')
+        setTimeout(() => {
+          setFields(false)
+        }, 4000);
+      })
+    } )
+  };
+
+
+
+  const deleteImage=()=>{
+    setIsLoading(true)
+    const deleteRef = ref(storage, imageAsset)
+    deleteObject(deleteRef).then(() => {
+      setImageAsset(null)
+      setIsLoading(false)
+      setFields(true)
+      setMsg('Image Deleted')
+      setAlertStatus('success')
+      setTimeout(() => {
+        setFields(false)
+      }, 4000);
+    })
+  }
+
+
+
+  const saveDetails=()=>{
+    setIsLoading(true)
+    try {
+        if (!title || !calories || !imageAsset || !price || !category) {
+          setFields(true);
+          setMsg("Required fields can't be empty");
+          setAlertStatus("danger");
+          setTimeout(() => {
+            setFields(false);
+            setIsLoading(false);
+          }, 4000);
+        } else {
+          const data = {
+            id: `${Date.now()}`,
+            title: title,
+            imageURL: imageAsset,
+            category: category,
+            calories: calories,
+            qty: 1,
+            price: price,
+          };
+          saveItem(data);
+          setIsLoading(false);
+          setFields(true);
+          setMsg("Data Uploaded successfully 😊");
+          setAlertStatus("success");
+          setTimeout(() => {
+            setFields(false);
+          }, 4000);
+          clearData();
+        }
+    } catch (error) {
+      console.log(error)
+      setFields(true)
+      setMsg('Error while uploading : Try Again Later')
+      setAlertStatus('danger')
+      setTimeout(() => {
+        setFields(false)
+        setIsLoading(false)
+      }, 4000);
+    }
+  }
+
+  const clearData = () => {
+    setTitle("");
+    setImageAsset(null);
+    setCalories("");
+    setPrice("");
+    setCategory("Select Category");
+  };
 
 
   return (
@@ -119,4 +215,4 @@ const CreateContainer = () => {
   )
 };
 
-export default CreateContainer;
+export default CreateContainer
